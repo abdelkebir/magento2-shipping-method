@@ -8,6 +8,7 @@
                 <model>Godogi\Tnt\Model\Carrier\Tnt</model>
                 <name>Tnt Shipping Method</name>
                 <price>10.00</price>
+                <free_shipping_subtotal>115.00</free_shipping_subtotal>
                 <title>Tnt Shipping Method</title>
                 <specificerrmsg>This shipping method is not available. To use this shipping method, please contact us.</specificerrmsg>
                 <handling_type>F</handling_type>

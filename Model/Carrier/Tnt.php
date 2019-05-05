@@ -11,12 +11,10 @@ class Tnt extends \Magento\Shipping\Model\Carrier\AbstractCarrier implements
      * @var string
      */
     protected $_code = 'tnt';
-
     /**
      * @var \Magento\Shipping\Model\Rate\ResultFactory
      */
     protected $_rateResultFactory;
-
     /**
      * @var \Magento\Quote\Model\Quote\Address\RateResult\MethodFactory
      */
@@ -44,7 +42,6 @@ class Tnt extends \Magento\Shipping\Model\Carrier\AbstractCarrier implements
         $this->_rateMethodFactory = $rateMethodFactory;
         parent::__construct($scopeConfig, $rateErrorFactory, $logger, $data);
     }
-
     /**
      * get allowed methods
      * @return array
@@ -53,16 +50,19 @@ class Tnt extends \Magento\Shipping\Model\Carrier\AbstractCarrier implements
     {
         return [$this->_code => $this->getConfigData('name')];
     }
-
     /**
      * @return float
      */
-    private function getShippingPrice()
+    private function getShippingPrice($request)
     {
-        $configPrice = $this->getConfigData('price');
-
+        $subtotal = $request->getBaseSubtotalInclTax();
+        $freeShippingSubtotal = $this->getConfigData('free_shipping_subtotal');
+        if($subtotal >= $freeShippingSubtotal){
+            $configPrice = 0;
+        }else{
+            $configPrice = $this->getConfigData('price');
+        }
         $shippingPrice = $this->getFinalPriceWithHandlingFee($configPrice);
-
         return $shippingPrice;
     }
 
@@ -75,26 +75,18 @@ class Tnt extends \Magento\Shipping\Model\Carrier\AbstractCarrier implements
         if (!$this->getConfigFlag('active')) {
             return false;
         }
-
         /** @var \Magento\Shipping\Model\Rate\Result $result */
         $result = $this->_rateResultFactory->create();
-
         /** @var \Magento\Quote\Model\Quote\Address\RateResult\Method $method */
         $method = $this->_rateMethodFactory->create();
-
         $method->setCarrier($this->_code);
         $method->setCarrierTitle($this->getConfigData('title'));
-
         $method->setMethod($this->_code);
         $method->setMethodTitle($this->getConfigData('name'));
-
-        $amount = $this->getShippingPrice();
-
+        $amount = $this->getShippingPrice($request);
         $method->setPrice($amount);
         $method->setCost($amount);
-
         $result->append($method);
-
         return $result;
     }
 }
